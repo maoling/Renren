@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-2.5.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+<context:annotation-config/> 
+<!--配置开启，组件扫描  让spring自动扫描以com开头的包组件(service/action)，然后自动完成封装-->
+<!-- <context:component-scan base-package="com"/> -->
+<!--配置数据源dataSource-->
+<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="driverClassName" value="org.gjt.mm.mysql.Driver"/>
+	    <property name="url" value="jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=utf-8"/>
+	    <property name="username" value="root"/>
+	    <property name="password" value="123456"/>
+	     <!-- 连接池启动时的初始值 -->
+	<property name="initialSize" value="3"/>
+	 <!-- 连接池的最大值 -->
+	 <property name="maxActive" value="500"/>
+ <!-- 最大空闲值.当经过一个高峰时间后，连接池可以慢慢将已经用不到的连接慢慢释放一部分，一直减少到maxIdle为止 -->
+	<property name="maxIdle" value="2"/>
+	<!--  最小空闲值.当空闲的连接数少于阀值时，连接池就会预申请去一些连接，以免洪峰来时来不及申请 -->
+	<property name="minIdle" value="1"/>
+</bean>
+
+<bean id="countryServiceImpl" class="com.renren.service.impl.CountryServiceImpl"/>
+<bean id="provinceServiceImpl" class="com.renren.service.impl.ProvinceServiceImpl"/>
+<bean id="universityServiceImpl" class="com.renren.service.impl.UniversityServiceImpl"/>
+
+<bean id="userServiceImpl" class="com.renren.service.impl.UserServiceImpl"/>
+<bean id="useruniversityServiceImpl" class="com.renren.service.impl.UseruniversityServiceImpl"/>
+
+<!-- 配置sessionFactory -->
+<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+     <property name="dataSource" ref="dataSource"/>
+     <property name="mappingResources">
+	    <list>
+	      <value>com/renren/domain/City.hbm.xml</value>
+	      <value>com/renren/domain/Country.hbm.xml</value>
+	      <value>com/renren/domain/Junior.hbm.xml</value>
+	      <value>com/renren/domain/Primaryschool.hbm.xml</value>
+	      <value>com/renren/domain/Province.hbm.xml</value>
+	      <value>com/renren/domain/Senior.hbm.xml</value>
+	      <value>com/renren/domain/Techschool.hbm.xml</value>
+	      <value>com/renren/domain/Town.hbm.xml</value>
+	      <value>com/renren/domain/University.hbm.xml</value>
+	      <value>com/renren/domain/Usernet.hbm.xml</value>
+	      <value>com/renren/domain/Users.hbm.xml</value>
+	      <value>com/renren/domain/Usersenior.hbm.xml</value>
+	      <value>com/renren/domain/Useruniversity.hbm.xml</value>
+	     <!--  <value>com/renren/domain/Album.hbm.xml</value> 
+	      <value>com/renren/domain/Photo.hbm.xml</value>
+	      <value>com/renren/domain/Photocomment.hbm.xml</value>-->
+	    </list>
+     </property>
+     <property name="hibernateProperties">
+	   <value>
+	        	hibernate.dialect=org.hibernate.dialect.MySQLDialect
+	        	hibernate.hbm2ddl.auto=update
+				hibernate.show_sql=true
+				hibernate.format_sql=false	      
+	  </value>
+    </property>
+</bean>
+  
+<!-- 配置action-->
+<bean name ="/register" class="com.renren.web.action.RegisterAction"/>
+<bean name ="/login" class="com.renren.web.action.LoginAction"/>
+<bean name ="/profile" class="com.renren.web.action.ProfileAction"/>
+
+<!-- <bean name="/test" scope="prototype" class="com.renren.web.action.TestAction">
+<property name="testservice" ref="testservice"/>
+</bean>  -->
+<!-- 配置一个service -->
+<!-- <bean id ="testservice" class="com.renren.service.TestService">
+<property name="sessionFactory" ref="sessionFactory"/>
+</bean> -->
+
+<!-- 配置事务管理器 -->
+<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+  	<property name="sessionFactory" ref="sessionFactory"/>
+</bean>
+<tx:annotation-driven transaction-manager="txManager"/><!-- 千万要加这句事务注释，不然save不成功而且不报错 -->
+</beans>
